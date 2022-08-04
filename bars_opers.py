@@ -64,16 +64,19 @@ def main_bars():
     driver.find_element(By.ID, "_mainContainer").find_element(By.CLASS_NAME, "cmbb-button").click()
     # Парсим список, находим должность «Главный врач» и выбираем ее
     driver.find_element(By.XPATH, "//span[contains(text(), 'Главный врач')]").click()
+    log_write(f'Список отфильтрован по значению «Главный врач» поля «Роль»', indention)
     # Ждем 4 секунды
     sleep(4)
     # Парсим форму, находим второе поле списка (со статусом документов) и разворачиваем список
     driver.find_element(By.ID, "_mainContainer").find_elements(By.CLASS_NAME, "cmbb-input")[1].click()
     # Парсим список, находим статус «Подписан» и выбираем его
     driver.find_element(By.XPATH, "//span[text()='Подписан']").click()
+    log_write(f'Список отфильтрован по значению «Подписан» поля «Статус подписи»', indention)
     # Ждем 4 секунды
     sleep(4)
     # Парсим форму, находим шестое поле ввода текста (номером версии документа) устанавливаем значение «1» и нажимаем «Enter»
     driver.find_elements(By.XPATH, "//input[@cmpparse='Edit']")[5].send_keys('1' + Keys.RETURN)
+    log_write(f'Список отфильтрован по значению «1» поля «Версия»', indention)
     # Ждем 4 секунды
     sleep(4)
 
@@ -81,9 +84,10 @@ def main_bars():
     driver.find_element(By.ID, "_mainContainer").find_elements(By.CLASS_NAME, "cmbb-input")[2].click()
     # Парсим список, находим статус «Ошибка получения ответа от РЭМД» и выбираем его
     driver.find_element(By.XPATH, "//span[text()='Ошибка получения ответа от РЭМД']").click()
+    log_write(f'Список отфильтрован по значению «Ошибка получения ответа от РЭМД» поля «Статус в РЭМД»', indention)
     # Ждем 4 секунды
     sleep(4)
-
+    doc_number = 0
     # Перебираем все записи из полученной таблицы
     while True:
         try:
@@ -95,6 +99,8 @@ def main_bars():
             sleep(1)
             # Парсим контекстное меню, находим пункт «Зарегистрировать в РЭМД» и выбираем его
             driver.find_element(By.XPATH, "//span[text()='Зарегистрировать в РЭМД']").click()
+            log_write(f'Отправляем в РЭМД свидетельство №{doc_number}', indention)
+            doc_number += 1
         except Exception:
             # Если не можем найти очередную запись, то считаем что список пуст и выходим из модуля
             break
@@ -112,6 +118,7 @@ def main_bars():
                 # Ждем 2 секунды
                 sleep(2)
                 # Если все прошло успешно, считаем, что документ отправился и выходим из цикла
+                log_write(f'Свидетельство №{doc_number} успешно отправлено в РЭМД', indention)
                 bool_1 = False
             except Exception:
                 # Если возникли ошибки, считаем, что документ все еще отправляется и продолжаем цикл проверки
@@ -119,7 +126,9 @@ def main_bars():
 
     # Находим кнопку выхода и нажимаем ее
     driver.find_element(By.CLASS_NAME, "Exit").click()
+    log_write(f'Осуществлен выход из МИС «БАРС»', indention)
     # Ждем 4 секунды
     sleep(4)
     # Закрываем экземпляр драйвера Google Chrome
     driver.close()
+    log_write(f'Закрыт экземпляр браузера Google Chrome', indention)
