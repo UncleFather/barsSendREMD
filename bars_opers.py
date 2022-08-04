@@ -93,17 +93,25 @@ def main_bars():
         try:
             # Пытаемся найти запись
             curr_element = driver.find_element(By.XPATH, "//span[contains(text(), 'Настройки подписи для СЭМД')]")
-            # Делаем правый клик
-            ActionChains(driver).context_click(curr_element).perform()
-            # Ждем 1 секунду
-            sleep(1)
-            # Парсим контекстное меню, находим пункт «Зарегистрировать в РЭМД» и выбираем его
-            driver.find_element(By.XPATH, "//span[text()='Зарегистрировать в РЭМД']").click()
-            log_write(f'Отправляем в РЭМД свидетельство №{doc_number}', indention)
-            doc_number += 1
         except Exception:
-            # Если не можем найти очередную запись, то считаем что список пуст и выходим из модуля
-            break
+            # Если не можем найти очередную запись «Настройки подписи для СЭМД», пытаемся найти запись
+            # «Нужен для хранения настроек»
+            try:
+                # Пытаемся найти запись
+                curr_element = driver.find_element(By.XPATH, "//span[contains(text(), 'Нужен для хранения настроек')]")
+            except Exception:
+                # Если не можем найти запись «Нужен для хранения настроек», то считаем что список пуст и выходим
+                # из модуля
+                break
+        # Делаем правый клик
+        ActionChains(driver).context_click(curr_element).perform()
+        # Ждем 1 секунду
+        sleep(1)
+        # Парсим контекстное меню, находим пункт «Зарегистрировать в РЭМД» и выбираем его
+        driver.find_element(By.XPATH, "//span[text()='Зарегистрировать в РЭМД']").click()
+        log_write(f'Отправляем в РЭМД свидетельство №{doc_number}', indention)
+        doc_number += 1
+
         # Инициализируем переменную для прерывания цикла проверки окончания отправки в РЭМД очередной записи
         bool_1 = True
         # Начинаем цикл проверки
@@ -115,7 +123,7 @@ def main_bars():
                 driver.find_element(By.XPATH, "//div[text()='Ок']")
                 # Пытаемся нажать кнопку
                 driver.find_element(By.CLASS_NAME, "btn_caption").click()
-                # Ждем 2 секунды
+                # Ждем 4 секунды
                 sleep(2)
                 # Если все прошло успешно, считаем, что документ отправился и выходим из цикла
                 log_write(f'Свидетельство №{doc_number} успешно отправлено в РЭМД', indention)
