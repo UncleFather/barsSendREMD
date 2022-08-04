@@ -1,4 +1,4 @@
-from initials import mis_url, mis_username, mis_password
+from initials_common import mis_url, mis_username, mis_password
 
 from txt_opers import log_write
 

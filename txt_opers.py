@@ -1,4 +1,4 @@
-from initials import txt_log_path, txt_log_name
+from initials_common import txt_log_path, txt_log_name
 
 from datetime import datetime as dt
 
