@@ -1,8 +1,11 @@
+from initials_common import mis_accounts
 from bars_opers import main_bars
 from txt_opers import log_write
 
 from datetime import datetime as dt
 from atexit import register
+from threading import Thread
+from selenium import webdriver
 import sys
 
 
@@ -65,9 +68,17 @@ indention = 2
 # Записываем время начала в журнал
 log_write(f'{"*" * 30} Начало генерации отчета от {curr_date:%Y.%m.%d} время начала {curr_date:%H:%M:%S}) '
           f'{"*" * 30}')
-# Запускаем основной модуль работы с МИС «Барс»
-log_write(f'Отправка запросов в МИС «Барс» и получение файлов выгрузок', indention)
-main_bars()
+# Открываем экземпляр драйвера Google Chrome (без этого действия сначала запустится только один поток)
+driver = webdriver.Chrome("chromedriver")
+# Перебираем все учетные записи из словаря пользователей
+for key, value in mis_accounts.items():
+    # Запускаем основной модуль работы с МИС «Барс» в нескольких потоках
+    log_write(f'Отправка запросов в МИС «Барс» и получение файлов выгрузок от имени {key}', indention)
+    #main_bars(key, value)
+    thread = Thread(target=main_bars, args=(key, value))
+    thread.start()
+#main_bars()
+# Закрываем экземпляр драйвера Google Chrome
+driver.close()
 # Выполняем выход
 exit(0)
-
