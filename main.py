@@ -1,12 +1,15 @@
-from initials_common import mis_accounts
+from initials_common import mis_accounts, mis_threads
+
 from bars_opers import main_bars
 from txt_opers import log_write
 
 from datetime import datetime as dt
+from time import sleep
 from atexit import register
 from threading import Thread
 from selenium import webdriver
 import sys
+import threading
 
 
 # Класс для обработки события выхода из программы
@@ -74,10 +77,12 @@ driver = webdriver.Chrome("chromedriver")
 for key, value in mis_accounts.items():
     # Запускаем основной модуль работы с МИС «Барс» в нескольких потоках
     log_write(f'Отправка запросов в МИС «Барс» и получение файлов выгрузок от имени {key}', indention)
-    #main_bars(key, value)
     thread = Thread(target=main_bars, args=(key, value))
     thread.start()
-#main_bars()
+    # Контролируем, чтобы количество активных потоков было не больше заданного
+    while threading.active_count() > mis_threads:
+        sleep(10)
+
 # Закрываем экземпляр драйвера Google Chrome
 driver.close()
 # Выполняем выход

@@ -1,4 +1,4 @@
-from initials_common import mis_url, mis_username, mis_password
+from initials_common import mis_url
 
 from txt_opers import log_write
 
@@ -9,12 +9,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 
-def main_bars(username=mis_username, password=mis_password):
+def main_bars(username, password):
     # Инициализируем переменную, указывающую количество отступов для файла отчета
     indention = 4
-    # Устанавливаем константы с учетными данными
-    #username = mis_username
-    #password = mis_password
     # Инициализируем драйвер Google Chrome
     driver = webdriver.Chrome("chromedriver")
     log_write(f'{username}: Открыт экземпляр Google Chrome', indention)
@@ -74,7 +71,8 @@ def main_bars(username=mis_username, password=mis_password):
     log_write(f'{username}: Список отфильтрован по значению «Подписан» поля «Статус подписи»', indention)
     # Ждем 4 секунды
     sleep(4)
-    # Парсим форму, находим шестое поле ввода текста (номером версии документа) устанавливаем значение «1» и нажимаем «Enter»
+    # Парсим форму, находим шестое поле ввода текста (номером версии документа) устанавливаем значение «1»
+    # и нажимаем «Enter»
     driver.find_elements(By.XPATH, "//input[@cmpparse='Edit']")[5].send_keys('1' + Keys.RETURN)
     log_write(f'{username}: Список отфильтрован по значению «1» поля «Версия»', indention)
     # Ждем 4 секунды
@@ -118,11 +116,8 @@ def main_bars(username=mis_username, password=mis_password):
             sleep(1)
             try:
                 # Пытаемся найти на форме кнопку «Ок» или «Продолжить» и нажать ее
-                #driver.find_element(By.XPATH, "//div[text()='Продолжить' or text()='Ок']")
                 # log_write(f'{username}: Пытаемся найти на форме кнопку «Ок» или «Продолжить»', indention)  # 5
                 driver.find_element(By.XPATH, "//div[@name='CONTINUE_BUTTON' or text()='Ок']").click()
-                # Пытаемся нажать кнопку
-                #driver.find_element(By.CLASS_NAME, "btn_caption").click()
                 # Ждем 4 секунды
                 sleep(2)
                 # Если все прошло успешно, считаем, что документ отправился и выходим из цикла
