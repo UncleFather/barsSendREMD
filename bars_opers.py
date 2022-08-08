@@ -54,79 +54,90 @@ def main_bars(username, password):
     driver.find_element(By.LINK_TEXT, 'Отчеты на подпись').click()
     log_write(f'{username}: Выбран пункт меню «Отчеты на подпись»', indention)
 
-    # Ждем 4 секунды
-    sleep(4)
+    # Ждем 6 секунд
+    sleep(6)
 
-    # Парсим форму, находим первое поле списка (с должностями) и разворачиваем список
-    driver.find_element(By.ID, "_mainContainer").find_element(By.CLASS_NAME, "cmbb-button").click()
-    # Парсим список, находим должность «Главный врач» и выбираем ее
-    driver.find_element(By.XPATH, "//span[contains(text(), 'Главный врач')]").click()
-    log_write(f'{username}: Список отфильтрован по значению «Главный врач» поля «Роль»', indention)
-    # Ждем 4 секунды
-    sleep(4)
-    # Парсим форму, находим второе поле списка (со статусом документов) и разворачиваем список
-    driver.find_element(By.ID, "_mainContainer").find_elements(By.CLASS_NAME, "cmbb-input")[1].click()
-    # Парсим список, находим статус «Подписан» и выбираем его
-    driver.find_element(By.XPATH, "//span[text()='Подписан']").click()
-    log_write(f'{username}: Список отфильтрован по значению «Подписан» поля «Статус подписи»', indention)
-    # Ждем 4 секунды
-    sleep(4)
-    # Парсим форму, находим шестое поле ввода текста (номером версии документа) устанавливаем значение «1»
-    # и нажимаем «Enter»
-    driver.find_elements(By.XPATH, "//input[@cmpparse='Edit']")[5].send_keys('1' + Keys.RETURN)
-    log_write(f'{username}: Список отфильтрован по значению «1» поля «Версия»', indention)
-    # Ждем 4 секунды
-    sleep(4)
+    # Выполняем цикл два раза. Первый - для еще не отправленных в РЭМД свидетельств, второй - для свидетельств
+    # с ошибкой регистрации в РЭМД, отправляемых повторно
+    for i in range(2):
+        # При первом проходе цикла будем отправлять в РЭМД ранее не отправлявшиеся свидетельства
+        if i == 0:
+            # Парсим форму, находим первое поле списка (с должностями) и разворачиваем список
+            driver.find_element(By.ID, "_mainContainer").find_element(By.CLASS_NAME, "cmbb-button").click()
+            # Парсим список, находим должность «Главный врач» и выбираем ее
+            driver.find_element(By.XPATH, "//span[contains(text(), 'Главный врач')]").click()
+            log_write(f'{username}: Список отфильтрован по значению «Главный врач» поля «Роль»', indention)
+            # Ждем 6 секунд
+            sleep(6)
+            # Парсим форму, находим второе поле списка (со статусом документов) и разворачиваем список
+            driver.find_element(By.ID, "_mainContainer").find_elements(By.CLASS_NAME, "cmbb-input")[1].click()
+            # Парсим список, находим статус «Подписан» и выбираем его
+            driver.find_element(By.XPATH, "//span[text()='Подписан']").click()
+            log_write(f'{username}: Список отфильтрован по значению «Подписан» поля «Статус подписи»', indention)
+            # Ждем 6 секунд
+            sleep(6)
+            # Парсим форму, находим шестое поле ввода текста (номером версии документа) устанавливаем значение «1»
+            # и нажимаем «Enter»
+            driver.find_elements(By.XPATH, "//input[@cmpparse='Edit']")[5].send_keys('1' + Keys.RETURN)
+            log_write(f'{username}: Список отфильтрован по значению «1» поля «Версия»', indention)
+            # Ждем 6 секунд
+            sleep(6)
+        # При втором проходе цикла будем отправлять в РЭМД те свидетельства, которые ранее отправлялись и
+        # вернулись с ошибкой
+        else:
+            # Парсим форму, находим третье поле списка (статус в РЭМД) и разворачиваем список
+            driver.find_element(By.ID, "_mainContainer").find_elements(By.CLASS_NAME, "cmbb-input")[2].click()
+            # Парсим список, находим статус «Ошибка получения ответа от РЭМД» и выбираем его
+            driver.find_element(By.XPATH, "//span[text()='Ошибка получения ответа от РЭМД']").click()
+            log_write(f'{username}: Список отфильтрован по значению «Ошибка получения ответа от РЭМД» поля '
+                      f'«Статус в РЭМД»', indention)
+            # Ждем 6 секунд
+            sleep(6)
 
-    # Парсим форму, находим третье поле списка (статус в РЭМД) и разворачиваем список
-    driver.find_element(By.ID, "_mainContainer").find_elements(By.CLASS_NAME, "cmbb-input")[2].click()
-    # Парсим список, находим статус «Ошибка получения ответа от РЭМД» и выбираем его
-    driver.find_element(By.XPATH, "//span[text()='Ошибка получения ответа от РЭМД']").click()
-    log_write(f'{username}: Список отфильтрован по значению «Ошибка получения ответа от РЭМД» поля «Статус в РЭМД»', indention)
-    # Ждем 4 секунды
-    sleep(4)
-    doc_number = 0
-    # Перебираем все записи из полученной таблицы
-    while True:
-        try:
-            # Пытаемся найти записи
-            # log_write(f'{username}: Пытаемся найти записи', indention) #1
-            curr_element = driver.find_element(By.XPATH, "//span[contains(text(), 'Нужен для хранения настроек') "
-                                                         "or contains(text(), 'Настройки подписи для СЭМД')]")
-        except Exception:
-            # log_write(f'{username}: 1-st try', indention) #2
-            # Если не можем найти записи, то считаем что список пуст и выходим из модуля
-            break
-        # Делаем правый клик
-        # log_write(f'{username}: Делаем правый клик', indention) #3
-        ActionChains(driver).context_click(curr_element).perform()
-        # Ждем 1 секунду
-        sleep(1)
-        # Парсим контекстное меню, находим пункт «Зарегистрировать в РЭМД» и выбираем его
-        # log_write(f'{username}: Парсим контекстное меню, находим пункт «Зарегистрировать в РЭМД»', indention)  # 4
-        driver.find_element(By.XPATH, "//span[text()='Зарегистрировать в РЭМД']").click()
-        log_write(f'{username}: Отправляем в РЭМД свидетельство №{doc_number}', indention)
-        doc_number += 1
-
-        # Инициализируем переменную для прерывания цикла проверки окончания отправки в РЭМД очередной записи
-        bool_1 = True
-        # Начинаем цикл проверки
-        while bool_1:
+        doc_number = 1
+        # Перебираем все записи из полученной таблицы
+        while True:
+            try:
+                # Пытаемся найти записи
+                log_write(f'{username}: Пытаемся найти записи', indention, 'debug')
+                curr_element = driver.find_element(By.XPATH, "//span[contains(text(), 'Нужен для хранения настроек') "
+                                                             "or contains(text(), 'Настройки подписи для СЭМД')]")
+            except Exception:
+                log_write(f'{username}: 1-st try', indention, 'debug')
+                # Если не можем найти записи, то считаем что список пуст и выходим из модуля
+                break
+            # Делаем правый клик
+            log_write(f'{username}: Делаем правый клик', indention, 'debug')
+            ActionChains(driver).context_click(curr_element).perform()
             # Ждем 1 секунду
             sleep(1)
-            try:
-                # Пытаемся найти на форме кнопку «Ок» или «Продолжить» и нажать ее
-                # log_write(f'{username}: Пытаемся найти на форме кнопку «Ок» или «Продолжить»', indention)  # 5
-                driver.find_element(By.XPATH, "//div[@name='CONTINUE_BUTTON' or text()='Ок']").click()
-                # Ждем 4 секунды
+            # Парсим контекстное меню, находим пункт «Зарегистрировать в РЭМД» и выбираем его
+            log_write(f'{username}: Парсим контекстное меню, находим пункт «Зарегистрировать в РЭМД»',
+                      indention, 'debug')
+            driver.find_element(By.XPATH, "//span[text()='Зарегистрировать в РЭМД']").click()
+            log_write(f'{username}: Отправляем в РЭМД свидетельство №{doc_number}', indention)
+            doc_number += 1
+
+            # Инициализируем переменную для прерывания цикла проверки окончания отправки в РЭМД очередной записи
+            bool_1 = True
+            # Начинаем цикл проверки
+            while bool_1:
+                # Ждем 2 секунды
                 sleep(2)
-                # Если все прошло успешно, считаем, что документ отправился и выходим из цикла
-                log_write(f'{username}: Свидетельство №{doc_number} успешно отправлено в РЭМД', indention)
-                bool_1 = False
-            except Exception:
-                # log_write(f'{username}: 2-nd try', indention)  # 6
-                # Если возникли ошибки, считаем, что документ все еще отправляется и продолжаем цикл проверки
-                pass
+                try:
+                    # Пытаемся найти на форме кнопку «Ок» или «Продолжить» и нажать ее
+                    log_write(f'{username}: Пытаемся найти на форме кнопку «Ок» или «Продолжить»',
+                              indention, 'debug')
+                    driver.find_element(By.XPATH, "//div[@name='CONTINUE_BUTTON' or text()='Ок']").click()
+                    # Ждем 4 секунды
+                    sleep(4)
+                    # Если все прошло успешно, считаем, что документ отправился и выходим из цикла
+                    log_write(f'{username}: Свидетельство №{doc_number} успешно отправлено в РЭМД', indention)
+                    bool_1 = False
+                except Exception:
+                    log_write(f'{username}: 2-nd try', indention, 'debug')
+                    # Если возникли ошибки, считаем, что документ все еще отправляется и продолжаем цикл проверки
+                    pass
 
     # Находим кнопку выхода и нажимаем ее
     driver.find_element(By.CLASS_NAME, "Exit").click()

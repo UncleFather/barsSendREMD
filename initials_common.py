@@ -15,3 +15,5 @@ mis_url = "http://xxx.xxx.xxx.xxx/path"
 txt_log_path = ''
 # Имя файла журнала событий выполнения программы
 txt_log_name = 'log_report.txt'
+# Уровень записи в файл журнала
+txt_level = {'normal', 'debug'}
